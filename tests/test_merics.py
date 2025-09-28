@@ -75,7 +75,7 @@ def test_ebitda():
     cogs_usd = to_usd(a[a["account_category"] == "COGS"], DS.fx).groupby("month")["amount_usd"].sum().to_dict()
     opex_rows = a[a["account_category"].astype(str).str.startswith("Opex")]
     opex_usd = to_usd(opex_rows, DS.fx).groupby("month")["amount_usd"].sum().to_dict()
-
+# +1m
     for m, e_usd, e_margin in zip(res["months"], res["ebitda_usd"], res["ebitda_margin"]):
         rev = float(rev_usd.get(m, 0.0))
         cogs = float(cogs_usd.get(m, 0.0))
