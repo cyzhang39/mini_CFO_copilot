@@ -1,4 +1,3 @@
-from __future__ import annotations
 from io import BytesIO
 from typing import List, Tuple
 import datetime as dt
@@ -16,7 +15,9 @@ def label_month(payload):
 
 
 def build_pdf(intent, payload, question, answer, figs):
-
+    # print(intent)
+    # print(payload)
+    # print(question)
     buf = BytesIO()
     with PdfPages(buf) as pdf:
         fig = plt.figure(figsize=(8.5, 11))
@@ -37,7 +38,7 @@ def build_pdf(intent, payload, question, answer, figs):
             "Answer:",
             textwrap.fill(answer or "", width=100),
         ]
-        y = 0.93
+        y = 0.9
         for ln in lines:
             ax.text(0.07, y, ln, fontsize=11, va="top")
             y -= 0.04 if ln else 0.02

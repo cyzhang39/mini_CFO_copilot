@@ -1,6 +1,3 @@
-# agent/data.py
-from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Optional, Tuple
 import os
@@ -21,9 +18,12 @@ def load_data(pth):
     xlsx_path = os.path.join(pth, "data.xlsx")
     xl = pd.ExcelFile(xlsx_path)
     actuals = load_actuals_budget(xl.parse("actuals"))
+    # print("acutals loaded")
     budget = load_actuals_budget(xl.parse("budget"))
+    
     cash = load_cash(xl.parse("cash"))
     fx = load_fx(xl.parse("fx"))
+    # print("data laoded")
     return DataStore(actuals=actuals, budget=budget, fx=fx, cash=cash)
 
 
@@ -37,8 +37,10 @@ def to_usd(df, fx, *, month="month", currency="currency", amount="amount", rate=
     merged = df.merge(temp_fx, on=[month, currency], how="left")
 
     if not is_numeric_dtype(merged[rate]):
+        # print(1)
         merged[rate] = pd.to_numeric(merged[rate], errors="coerce")
     if not is_numeric_dtype(merged[amount]):
+        # print(2)
         merged[amount] = pd.to_numeric(merged[amount], errors="coerce")
 
     merged[amount_usd] = merged[amount] * merged[rate]
@@ -66,19 +68,14 @@ def load_actuals_budget(pth):
 
 
 def load_fx(path):
-
     df = load_csv(path, required=["month", "currency", "rate_to_usd"])
-
     df["rate_to_usd"] = pd.to_numeric(df["rate_to_usd"], errors="coerce")
-
     return df
 
 
 def load_cash(path):
     df = load_csv(path, required=["month", "entity", "cash_usd"])
-
     df["cash_usd"] = pd.to_numeric(df["cash_usd"], errors="coerce")
-
     return df
 
 

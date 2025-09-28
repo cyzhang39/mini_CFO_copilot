@@ -1,6 +1,3 @@
-# agent/tools.py
-from __future__ import annotations
-
 from typing import Optional, Dict, Any, List
 import pandas as pd
 from agent.data import DataStore, to_usd, load_data
@@ -38,6 +35,7 @@ def revenue(ds, months, entity):
 def gross_margin(ds, months, entity):
 
     if not months:
+        # print(months)
         return {"months": [], "entity": entity or "All", "gm_usd": [], "gm_pct": []}
 
     a = ds.actuals[(ds.actuals["month"].isin(months)) & (ds.actuals["account_category"].isin(["Revenue", "COGS"]))]
@@ -50,7 +48,7 @@ def gross_margin(ds, months, entity):
 
     rev_by_month = grouped[grouped["account_category"] == "Revenue"].set_index("month")["amount_usd"].to_dict()
     cogs_by_month = grouped[grouped["account_category"] == "COGS"].set_index("month")["amount_usd"].to_dict()
-
+    # print(rev_by_month.head())
     gm_usd = []
     gm_pct = []
 
@@ -62,7 +60,8 @@ def gross_margin(ds, months, entity):
 
         gm_usd.append(gm)
         gm_pct.append(pct)
-
+    # print(gm_usd)
+    # print(gm_pct)
     return {
         "months": months,
         "entity": entity or "All",
@@ -71,6 +70,7 @@ def gross_margin(ds, months, entity):
     }
 
 def opex_total(ds, months, entity):
+    # print(months)
     month = months[0]
     a = ds.actuals[ds.actuals["month"] == month]
     a = a[a["account_category"].astype(str).str.startswith("Opex")]
@@ -80,6 +80,7 @@ def opex_total(ds, months, entity):
     a_usd = to_usd(a, ds.fx)
 
     if a_usd.empty:
+        # print()
         return {
             "month": month,
             "entity": entity or "All",
@@ -89,6 +90,7 @@ def opex_total(ds, months, entity):
         }
 
     by_cat = (a_usd.groupby("account_category", as_index=False)["amount_usd"].sum().sort_values("account_category"))
+    # print(by_cat)
     categories = by_cat["account_category"].tolist()
     values = by_cat["amount_usd"].astype(float).tolist()
     total_opex = float(sum(values))
@@ -102,7 +104,6 @@ def opex_total(ds, months, entity):
     }
 
 
-
 def ebitda(ds, months, entity):
     if not months:
         return {"months": [], "entity": entity or "All", "ebitda_usd": [], "ebitda_margin": []}
@@ -110,16 +111,19 @@ def ebitda(ds, months, entity):
     a = ds.actuals[ds.actuals["month"].isin(months)]
     mask_rev_cogs = a["account_category"].isin(["Revenue", "COGS"])
     a = a[mask_rev_cogs]
+    # print(a.head())
     if entity:
         a = a[a["entity"] == entity]
     a_usd = to_usd(a, ds.fx)
 
     grouped = (a_usd.groupby(["month", "account_category"], as_index=False)["amount_usd"].sum())
+    # print(grouped)
     rev_by_m = grouped[grouped["account_category"] == "Revenue"].set_index("month")["amount_usd"].to_dict()
+    # print(rev_by_m)
     cogs_by_m = grouped[grouped["account_category"] == "COGS"].set_index("month")["amount_usd"].to_dict()
-
-    e_vals: List[float] = []
-    e_margin: List[Optional[float]] = []
+    # print(cogs_by_m)
+    e_vals = []
+    e_margin = []
 
     for m in months:
         opex_info = opex_total(ds, months=[m], entity=entity)
@@ -132,7 +136,8 @@ def ebitda(ds, months, entity):
 
         e_vals.append(ebitda)
         e_margin.append(margin)
-
+    # print(e_vals)
+    # print(e_margin)
     return {
         "months": months,
         "entity": entity or "All",
@@ -170,7 +175,7 @@ def cash_runway(ds, months, entity):
     a = a[mask_rev | mask_cogs | mask_opex]
 
     grouped = a.groupby(["month", "account_category"], as_index=False)["amount"].sum()
-
+    # print(grouped)
     rev_by_m = grouped[grouped["account_category"] == "Revenue"].set_index("month")["amount"].to_dict()
     cogs_by_m = grouped[grouped["account_category"] == "COGS"].set_index("month")["amount"].to_dict()
     opex_rows = grouped[grouped["account_category"].astype(str).str.startswith("Opex")]
@@ -183,9 +188,11 @@ def cash_runway(ds, months, entity):
         opex = float(opex_by_m.get(m, 0.0))
         burn = (cogs + opex) - rev
         burns.append(burn if burn > 0 else 0.0)
-
+    # print(burns)
     avg_burn = float(pd.Series(burns).mean()) if burns else 0.0
+    # print(avg_burn)
     runway = (cash_usd / avg_burn) if avg_burn > 0 else None
+    # print(runway)
 
     return {
         "month": last,
@@ -199,10 +206,10 @@ def cash_runway(ds, months, entity):
 
 # actuals = pd.DataFrame([
 #         {"month": "2025-06", "entity": "A", "account_category": "Opex:Marketing", "amount": 100.0, "currency": "EUR"},
-#         {"month": "2025-06", "entity": "A", "account_category": "Opex:R&D",       "amount":  50.0, "currency": "USD"},
-#         {"month": "2025-06", "entity": "B", "account_category": "Opex:G&A",       "amount":  30.0, "currency": "USD"},
-#         {"month": "2025-06", "entity": "A", "account_category": "Revenue",        "amount": 999.0, "currency": "USD"},
-#         {"month": "2025-06", "entity": "B", "account_category": "COGS",           "amount": 999.0, "currency": "USD"},
+#         {"month": "2025-06", "entity": "A", "account_category": "Opex:R&D", "amount":  50.0, "currency": "USD"},
+#         {"month": "2025-06", "entity": "B", "account_category": "Opex:G&A", "amount":  30.0, "currency": "USD"},
+#         {"month": "2025-06", "entity": "A", "account_category": "Revenue",  "amount": 999.0, "currency": "USD"},
+#         {"month": "2025-06", "entity": "B", "account_category": "COGS", "amount": 999.0, "currency": "USD"},
 #         {"month": "2025-05", "entity": "A", "account_category": "Opex:Marketing", "amount": 777.0, "currency": "USD"},
 #     ])
 

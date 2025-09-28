@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -25,6 +23,7 @@ st.caption("What was June 2025 revenue vs budget in USD?")
 st.caption("Show Gross Margin % trend for the last 3 months.")
 st.caption("Break down Opex by category for June.")
 st.caption("What is our cash runway right now?")
+
 try:
     ds = get_datastore()
 except Exception as e:
@@ -34,6 +33,7 @@ except Exception as e:
 question = st.text_input("Your question")
 
 if question.strip():
+    # print(question.strip())
     try:
         interp = interpret(question)    
         routed = route(interp, ds)      
@@ -46,6 +46,8 @@ if question.strip():
             answer = answer_text(intent, payload, question)
             st.subheader("Answer")
             st.text(answer)
+            # print(intent)
+            # print(payload)
 
             charts = render_charts(intent, payload)
             pdf_bytes, file_name = build_pdf(intent, payload, question, answer, charts)

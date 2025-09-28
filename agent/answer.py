@@ -1,4 +1,3 @@
-# agent/answer.py
 from __future__ import annotations
 import os, json, requests
 
@@ -6,6 +5,9 @@ def answer_text(intent, payload, question):
     api_url = os.getenv("HF_API_URL", "https://router.huggingface.co/v1/chat/completions")
     api_token = os.getenv("HF_TOKEN")
     model = os.getenv("HF_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
+    # print(api_url)
+    # print(api_token)
+    # print(model)
     if not api_token:
         raise RuntimeError("HF_TOKEN not set")
 
@@ -34,7 +36,7 @@ def answer_text(intent, payload, question):
             "temperature": 0,
             "max_tokens": 518,
         },
-        timeout=60,
+        # timeout=60,
     )
     r.raise_for_status()
     text = r.json()["choices"][0]["message"]["content"].strip()
