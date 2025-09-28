@@ -4,7 +4,7 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 
 usd_fmt = FuncFormatter(lambda x, pos: f"${x/1_000:,.0f}k")
-pct_fmt = FuncFormatter(lambda x, pos: f"{x*100:.1f}%")
+pct_fmt = FuncFormatter(lambda x, pos: f"{x*100:.3f}%")
 
 def chart_revenue(payload):
     labels = ["Actual", "Budget"]
