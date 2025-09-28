@@ -29,7 +29,7 @@ conda create -n cfopilot python=3.9 --y
 conda activate cfopilot
 pip install -r requirements.txt
 ```
-### Tests
+### Tests (load data and data functions)
 ```
 pytest tests
 ```
