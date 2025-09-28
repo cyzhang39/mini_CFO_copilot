@@ -40,6 +40,7 @@ streamlit run app.py
 ```
 
 ## Video Demo
+https://www.youtube.com/watch?v=LWZ73DN_sLA
 <video width="640" height="480" controls>
   <source src="tests/demo.mp4" type="video/mp4">
 </video>
