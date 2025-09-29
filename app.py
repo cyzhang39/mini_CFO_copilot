@@ -7,6 +7,7 @@ from agent.router import route
 from agent.answer import answer_text
 from agent.charts import render_charts
 from agent.export import build_pdf
+from agent.rlhf import log_feedback
 
 load_dotenv(override=False)
 st.set_page_config(page_title="CFO Copilot", layout="wide")
@@ -48,8 +49,18 @@ if question.strip():
             st.text(answer)
             # print(intent)
             # print(payload)
-
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                good = st.button("Helpful")
+            with c2:
+                bad = st.button("Not helpful")
+            if good:
+                log_feedback(1)
+            if bad:
+                log_feedback(-1)
             charts = render_charts(intent, payload)
+
             pdf_bytes, file_name = build_pdf(intent, payload, question, answer, charts)
             st.download_button(
                 "Export PDF",

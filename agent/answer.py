@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os, json, requests
 
-def answer_text(intent, payload, question):
+def answer_text(intent, payload, question, style="concise"):
     api_url = os.getenv("HF_API_URL", "https://router.huggingface.co/v1/chat/completions")
     api_token = os.getenv("HF_TOKEN")
     model = os.getenv("HF_MODEL", "meta-llama/Llama-3.1-8B-Instruct")
@@ -10,15 +10,18 @@ def answer_text(intent, payload, question):
     # print(model)
     if not api_token:
         raise RuntimeError("HF_TOKEN not set")
-
+    
+    style_instruct = "write one concise answer to the user's question."
+    if style != "concise":
+        style_instruct = "write up to TWO sentences: one key takeaway, then a brief qualifier if helpful."
     system = (
-        "You are a finance assistant. Reply with one short plain-text sentence "
+        "You are a finance assistant. Reply with one short plain-text sentence."
         "using ONLY the provided JSON payload. Do not invent numbers or months. If evident, provide exact timeline in the answer."
         "No markdown, no code fences. Avoid exaggerated words."
     )
     print(payload)
     user = (
-        "Write one concise answer to the user's question using only this data.\n"
+        f"Using this information, {style_instruct}\n"
         f"question: {question}\n"
         f"intent: {json.dumps(intent)}\n"
         f"payload: {json.dumps(payload, ensure_ascii=False)}\n"
